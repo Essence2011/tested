@@ -67,12 +67,16 @@
 
                 <div class="admin-tabs">
                     <button class="tab-btn active" data-tab="visits">Посещения</button>
+                    <button class="tab-btn" data-tab="ip-categories">Категории IP</button>
                     <button class="tab-btn" data-tab="messages">Сообщения</button>
                     <button class="tab-btn" data-tab="analytics">Аналитика</button>
                 </div>
 
                 <div id="visits-tab" class="tab-content active">
-                    <h2 class="section-title">Последние Посещения</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                        <h2 class="section-title" style="margin: 0;">Последние Посещения</h2>
+                        <button id="clear-all-visits" class="delete-btn danger-btn">🗑️ Очистить всё</button>
+                    </div>
                     <div class="table-container">
                         <table class="data-table">
                             <thead>
@@ -83,16 +87,71 @@
                                     <th>Город</th>
                                     <th>Страна</th>
                                     <th>Устройство</th>
+                                    <th>Действия</th>
                                 </tr>
                             </thead>
                             <tbody id="visits-table-body">
                                 <tr>
-                                    <td colspan="6" style="text-align: center; padding: 40px;">
+                                    <td colspan="7" style="text-align: center; padding: 40px;">
                                         Загрузка данных...
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+
+                <div id="ip-categories-tab" class="tab-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
+                        <h2 class="section-title" style="margin: 0;">Управление Категориями IP</h2>
+                    </div>
+
+                    <div class="ip-category-form">
+                        <h3>Добавить IP в категорию</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 15px; align-items: end;">
+                            <div class="form-group" style="margin: 0;">
+                                <label>IP Адрес</label>
+                                <input type="text" id="new-ip" placeholder="192.168.1.1" style="padding: 12px;">
+                            </div>
+                            <div class="form-group" style="margin: 0;">
+                                <label>Категория</label>
+                                <select id="ip-category" style="padding: 12px; background: var(--primary); color: var(--text); border: 1px solid rgba(233, 69, 96, 0.2); border-radius: 8px; width: 100%;">
+                                    <option value="trusted">✅ Доверенные</option>
+                                    <option value="blocked">🚫 Заблокированные</option>
+                                    <option value="suspicious">⚠️ Подозрительные</option>
+                                    <option value="vip">⭐ VIP</option>
+                                    <option value="team">👥 Команда</option>
+                                </select>
+                            </div>
+                            <button id="add-ip-category" class="submit-btn" style="margin: 0; white-space: nowrap;">Добавить</button>
+                        </div>
+                    </div>
+
+                    <div class="ip-categories-container">
+                        <div class="category-section">
+                            <h3>✅ Доверенные IP</h3>
+                            <div id="trusted-ips" class="ip-list"></div>
+                        </div>
+
+                        <div class="category-section">
+                            <h3>🚫 Заблокированные IP</h3>
+                            <div id="blocked-ips" class="ip-list"></div>
+                        </div>
+
+                        <div class="category-section">
+                            <h3>⚠️ Подозрительные IP</h3>
+                            <div id="suspicious-ips" class="ip-list"></div>
+                        </div>
+
+                        <div class="category-section">
+                            <h3>⭐ VIP IP</h3>
+                            <div id="vip-ips" class="ip-list"></div>
+                        </div>
+
+                        <div class="category-section">
+                            <h3>👥 Команда</h3>
+                            <div id="team-ips" class="ip-list"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -130,6 +189,17 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content">
+            <h3>Подтверждение удаления</h3>
+            <p id="confirm-message">Вы уверены?</p>
+            <div class="modal-buttons">
+                <button id="confirm-yes" class="submit-btn">Да, удалить</button>
+                <button id="confirm-no" class="logout-btn">Отмена</button>
             </div>
         </div>
     </div>

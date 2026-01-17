@@ -1,5 +1,5 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-import { getDatabase, ref, get, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+import { getDatabase, ref, get, onValue, remove, set, push } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
 // Firebase config
 const firebaseConfig = {
@@ -86,35 +86,94 @@ tabBtns.forEach(btn => {
 function loadDashboard() {
     loadVisits();
     loadMessages();
+    loadIPCategories();
 }
 
+// Modal functions
+function showConfirmModal(message, onConfirm) {
+    const modal = document.getElementById('confirm-modal');
+    const confirmMsg = document.getElementById('confirm-message');
+    const yesBtn = document.getElementById('confirm-yes');
+    const noBtn = document.getElementById('confirm-no');
+    
+    confirmMsg.textContent = message;
+    modal.classList.add('show');
+    
+    yesBtn.onclick = () => {
+        modal.classList.remove('show');
+        onConfirm();
+    };
+    
+    noBtn.onclick = () => {
+        modal.classList.remove('show');
+    };
+    
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('show');
+        }
+    };
+}
+
+// Delete single visit
+async function deleteVisit(visitKey) {
+    try {
+        await remove(ref(database, `visits/${visitKey}`));
+        console.log('Visit deleted successfully');
+    } catch (error) {
+        console.error('Error deleting visit:', error);
+        alert('Ошибка при удалении записи');
+    }
+}
+
+// Clear all visits
+document.getElementById('clear-all-visits')?.addEventListener('click', () => {
+    showConfirmModal('Вы уверены что хотите удалить ВСЕ записи о посещениях?', async () => {
+        try {
+            await remove(ref(database, 'visits'));
+            alert('Все записи удалены');
+        } catch (error) {
+            console.error('Error clearing visits:', error);
+            alert('Ошибка при удалении');
+        }
+    });
+});
+
 // Load visits data
+let allVisitsData = {};
+
 function loadVisits() {
     const visitsRef = ref(database, 'visits');
     
     onValue(visitsRef, (snapshot) => {
         const data = snapshot.val();
+        allVisitsData = data || {};
         
         if (!data) {
             document.getElementById('visits-table-body').innerHTML = `
                 <tr>
-                    <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                    <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">
                         Нет данных о посещениях
                     </td>
                 </tr>
             `;
+            updateStats([]);
             return;
         }
         
-        const visits = Object.values(data);
-        const sortedVisits = visits.sort((a, b) => b.timestamp - a.timestamp);
+        const visitsArray = Object.entries(data).map(([key, value]) => ({
+            key,
+            ...value
+        }));
+        
+        const sortedVisits = visitsArray.sort((a, b) => b.timestamp - a.timestamp);
         
         // Update stats
-        updateStats(visits);
+        updateStats(visitsArray);
         
         // Update table
         const tableBody = document.getElementById('visits-table-body');
-        tableBody.innerHTML = sortedVisits.slice(0, 50).map(visit => {
+        tableBody.innerHTML = sortedVisits.slice(0, 100).map(visit => {
             const date = new Date(visit.timestamp);
             const formattedDate = date.toLocaleDateString('ru-RU', {
                 day: '2-digit',
@@ -136,14 +195,24 @@ function loadVisits() {
                     <td>${visit.city || 'Unknown'}</td>
                     <td>${visit.country || 'Unknown'}</td>
                     <td>${device}</td>
+                    <td>
+                        <button class="delete-btn" onclick="window.deleteVisitItem('${visit.key}')">
+                            🗑️ Удалить
+                        </button>
+                    </td>
                 </tr>
             `;
         }).join('');
         
         // Update analytics
-        updateAnalytics(visits);
+        updateAnalytics(visitsArray);
     });
 }
+
+// Make delete function global
+window.deleteVisitItem = function(key) {
+    showConfirmModal('Удалить эту запись?', () => deleteVisit(key));
+};
 
 // Update statistics
 function updateStats(visits) {
@@ -157,30 +226,6 @@ function updateStats(visits) {
     document.getElementById('today-visits').textContent = todayVisits;
     document.getElementById('unique-ips').textContent = uniqueIPs;
     document.getElementById('mobile-visits').textContent = mobileVisits;
-    
-    // Animate counters
-    animateValue('total-visits', 0, totalVisits, 1000);
-    animateValue('today-visits', 0, todayVisits, 1000);
-    animateValue('unique-ips', 0, uniqueIPs, 1000);
-    animateValue('mobile-visits', 0, mobileVisits, 1000);
-}
-
-// Animate counter
-function animateValue(id, start, end, duration) {
-    const element = document.getElementById(id);
-    const range = end - start;
-    const increment = range / (duration / 16);
-    let current = start;
-    
-    const timer = setInterval(() => {
-        current += increment;
-        if (current >= end) {
-            element.textContent = end;
-            clearInterval(timer);
-        } else {
-            element.textContent = Math.floor(current);
-        }
-    }, 16);
 }
 
 // Get device type
@@ -192,6 +237,14 @@ function getDeviceType(userAgent) {
 
 // Update analytics
 function updateAnalytics(visits) {
+    if (visits.length === 0) {
+        document.getElementById('popular-pages').innerHTML = '<p class="empty-category">Нет данных</p>';
+        document.getElementById('visitor-countries').innerHTML = '<p class="empty-category">Нет данных</p>';
+        document.getElementById('traffic-sources').innerHTML = '<p class="empty-category">Нет данных</p>';
+        document.getElementById('browsers').innerHTML = '<p class="empty-category">Нет данных</p>';
+        return;
+    }
+    
     // Popular pages
     const pageCount = {};
     visits.forEach(v => {
@@ -251,7 +304,14 @@ function updateAnalytics(visits) {
     // Traffic sources
     const sourceCount = {};
     visits.forEach(v => {
-        const referrer = v.referrer === 'Direct' ? 'Direct' : new URL(v.referrer || 'Direct').hostname || 'Direct';
+        let referrer = 'Direct';
+        if (v.referrer && v.referrer !== 'Direct') {
+            try {
+                referrer = new URL(v.referrer).hostname;
+            } catch (e) {
+                referrer = 'Direct';
+            }
+        }
         sourceCount[referrer] = (sourceCount[referrer] || 0) + 1;
     });
     
@@ -315,6 +375,87 @@ function detectBrowser(userAgent) {
     return 'Other';
 }
 
+// IP Categories Management
+async function addIPCategory(ip, category) {
+    try {
+        const ipCategoriesRef = ref(database, `ipCategories/${category}`);
+        const newIPRef = push(ipCategoriesRef);
+        await set(newIPRef, {
+            ip: ip,
+            addedAt: Date.now()
+        });
+        alert('IP добавлен в категорию');
+        document.getElementById('new-ip').value = '';
+    } catch (error) {
+        console.error('Error adding IP category:', error);
+        alert('Ошибка при добавлении IP');
+    }
+}
+
+async function deleteIPCategory(category, key) {
+    try {
+        await remove(ref(database, `ipCategories/${category}/${key}`));
+    } catch (error) {
+        console.error('Error deleting IP:', error);
+        alert('Ошибка при удалении IP');
+    }
+}
+
+document.getElementById('add-ip-category')?.addEventListener('click', () => {
+    const ip = document.getElementById('new-ip').value.trim();
+    const category = document.getElementById('ip-category').value;
+    
+    if (!ip) {
+        alert('Введите IP адрес');
+        return;
+    }
+    
+    // Simple IP validation
+    const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
+    if (!ipRegex.test(ip)) {
+        alert('Неверный формат IP адреса');
+        return;
+    }
+    
+    addIPCategory(ip, category);
+});
+
+function loadIPCategories() {
+    const categories = ['trusted', 'blocked', 'suspicious', 'vip', 'team'];
+    
+    categories.forEach(category => {
+        const categoryRef = ref(database, `ipCategories/${category}`);
+        
+        onValue(categoryRef, (snapshot) => {
+            const data = snapshot.val();
+            const container = document.getElementById(`${category}-ips`);
+            
+            if (!data) {
+                container.innerHTML = '<p class="empty-category">Пусто</p>';
+                return;
+            }
+            
+            const ips = Object.entries(data).map(([key, value]) => ({
+                key,
+                ...value
+            }));
+            
+            container.innerHTML = ips.map(item => `
+                <div class="ip-item">
+                    <span class="ip-item-address">${item.ip}</span>
+                    <button class="ip-item-delete" onclick="window.deleteIPCategoryItem('${category}', '${item.key}')">
+                        Удалить
+                    </button>
+                </div>
+            `).join('');
+        });
+    });
+}
+
+window.deleteIPCategoryItem = function(category, key) {
+    showConfirmModal('Удалить этот IP из категории?', () => deleteIPCategory(category, key));
+};
+
 // Load messages
 function loadMessages() {
     const messagesRef = ref(database, 'messages');
@@ -332,7 +473,11 @@ function loadMessages() {
             return;
         }
         
-        const messages = Object.values(data);
+        const messages = Object.entries(data).map(([key, value]) => ({
+            key,
+            ...value
+        }));
+        
         const sortedMessages = messages.sort((a, b) => b.timestamp - a.timestamp);
         
         container.innerHTML = sortedMessages.map(msg => {
@@ -347,6 +492,9 @@ function loadMessages() {
             
             return `
                 <div class="message-card">
+                    <button class="message-delete delete-btn" onclick="window.deleteMessage('${msg.key}')">
+                        🗑️ Удалить
+                    </button>
                     <div class="message-header">
                         <div class="message-info">
                             <h3>${msg.name}</h3>
@@ -361,3 +509,14 @@ function loadMessages() {
         }).join('');
     });
 }
+
+window.deleteMessage = function(key) {
+    showConfirmModal('Удалить это сообщение?', async () => {
+        try {
+            await remove(ref(database, `messages/${key}`));
+        } catch (error) {
+            console.error('Error deleting message:', error);
+            alert('Ошибка при удалении сообщения');
+        }
+    });
+};
