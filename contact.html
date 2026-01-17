@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Контакты - Современный Веб-Портал</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Work+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">ПОРТАЛ</a>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Главная</a></li>
+                <li><a href="about.html" class="nav-link">О нас</a></li>
+                <li><a href="services.html" class="nav-link">Услуги</a></li>
+                <li><a href="contact.html" class="nav-link active">Контакты</a></li>
+                <li><a href="admin.html" class="nav-link admin-link">Админ</a></li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="page-header">
+        <h1 class="page-title">Свяжитесь с Нами</h1>
+        <p class="section-subtitle">Мы всегда рады ответить на ваши вопросы</p>
+    </section>
+
+    <section class="content-section">
+        <div class="container">
+            <div class="content-grid" style="margin-bottom: 60px;">
+                <div class="content-card">
+                    <div style="font-size: 48px; margin-bottom: 20px;">📧</div>
+                    <h3>Email</h3>
+                    <p>info@portal.com</p>
+                    <p>support@portal.com</p>
+                </div>
+                
+                <div class="content-card">
+                    <div style="font-size: 48px; margin-bottom: 20px;">📞</div>
+                    <h3>Телефон</h3>
+                    <p>+7 (999) 123-45-67</p>
+                    <p>Пн-Пт: 9:00 - 18:00</p>
+                </div>
+                
+                <div class="content-card">
+                    <div style="font-size: 48px; margin-bottom: 20px;">📍</div>
+                    <h3>Адрес</h3>
+                    <p>г. Москва</p>
+                    <p>ул. Примерная, д. 1</p>
+                </div>
+            </div>
+
+            <form class="contact-form">
+                <h2 style="font-family: 'Playfair Display', serif; text-align: center; margin-bottom: 40px; color: var(--accent);">
+                    Отправьте нам сообщение
+                </h2>
+                
+                <div class="form-group">
+                    <label for="name">Ваше имя</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="subject">Тема</label>
+                    <input type="text" id="subject" name="subject" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Сообщение</label>
+                    <textarea id="message" name="message" required></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">ОТПРАВИТЬ</button>
+            </form>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>ПОРТАЛ</h3>
+                    <p>Создаем цифровое будущее вместе</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Навигация</h4>
+                    <ul>
+                        <li><a href="index.html">Главная</a></li>
+                        <li><a href="about.html">О нас</a></li>
+                        <li><a href="services.html">Услуги</a></li>
+                        <li><a href="contact.html">Контакты</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Контакты</h4>
+                    <p>Email: info@portal.com</p>
+                    <p>Тел: +7 (999) 123-45-67</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 ПОРТАЛ. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>

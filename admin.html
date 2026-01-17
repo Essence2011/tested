@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ Панель - Современный Веб-Портал</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Work+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="login-screen" class="login-container">
+        <div class="login-box">
+            <h1 class="login-title">Админ Панель</h1>
+            <p class="login-subtitle">Введите пароль для доступа</p>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <input type="password" id="password" name="password" placeholder="Введите пароль" required>
+                </div>
+                <button type="submit" class="submit-btn">ВОЙТИ</button>
+                <p id="error-message" class="error-message"></p>
+            </form>
+        </div>
+    </div>
+
+    <div id="admin-panel" class="admin-panel" style="display: none;">
+        <nav class="navbar">
+            <div class="nav-container">
+                <a href="index.html" class="logo">ПОРТАЛ</a>
+                <div class="admin-header">
+                    <span class="admin-badge">Админ Панель</span>
+                    <button id="logout-btn" class="logout-btn">Выйти</button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="admin-content">
+            <div class="container">
+                <h1 class="page-title">Панель Аналитики</h1>
+                
+                <div class="stats-grid" style="margin-top: 40px;">
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-value" id="total-visits">0</div>
+                        <div class="stat-label">Всего посещений</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">📅</div>
+                        <div class="stat-value" id="today-visits">0</div>
+                        <div class="stat-label">Сегодня</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">🌍</div>
+                        <div class="stat-value" id="unique-ips">0</div>
+                        <div class="stat-label">Уникальных IP</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">📱</div>
+                        <div class="stat-value" id="mobile-visits">0</div>
+                        <div class="stat-label">Мобильные</div>
+                    </div>
+                </div>
+
+                <div class="admin-tabs">
+                    <button class="tab-btn active" data-tab="visits">Посещения</button>
+                    <button class="tab-btn" data-tab="messages">Сообщения</button>
+                    <button class="tab-btn" data-tab="analytics">Аналитика</button>
+                </div>
+
+                <div id="visits-tab" class="tab-content active">
+                    <h2 class="section-title">Последние Посещения</h2>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Дата/Время</th>
+                                    <th>IP Адрес</th>
+                                    <th>Страница</th>
+                                    <th>Город</th>
+                                    <th>Страна</th>
+                                    <th>Устройство</th>
+                                </tr>
+                            </thead>
+                            <tbody id="visits-table-body">
+                                <tr>
+                                    <td colspan="6" style="text-align: center; padding: 40px;">
+                                        Загрузка данных...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="messages-tab" class="tab-content">
+                    <h2 class="section-title">Сообщения от Клиентов</h2>
+                    <div class="messages-container" id="messages-container">
+                        <p style="text-align: center; color: var(--text-muted); padding: 40px;">
+                            Загрузка сообщений...
+                        </p>
+                    </div>
+                </div>
+
+                <div id="analytics-tab" class="tab-content">
+                    <h2 class="section-title">Подробная Аналитика</h2>
+                    
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <h3>Популярные Страницы</h3>
+                            <div id="popular-pages"></div>
+                        </div>
+                        
+                        <div class="analytics-card">
+                            <h3>География Посетителей</h3>
+                            <div id="visitor-countries"></div>
+                        </div>
+                        
+                        <div class="analytics-card">
+                            <h3>Источники Трафика</h3>
+                            <div id="traffic-sources"></div>
+                        </div>
+                        
+                        <div class="analytics-card">
+                            <h3>Браузеры</h3>
+                            <div id="browsers"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="admin.js"></script>
+</body>
+</html>
